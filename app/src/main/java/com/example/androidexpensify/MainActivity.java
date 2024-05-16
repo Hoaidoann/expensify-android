@@ -1,5 +1,6 @@
 package com.example.androidexpensify;
 
+
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         DatabaseManager databaseManager = new DatabaseManager(this);
         databaseManager.open();
 
-        // using room persistence
+        // using room persistence (Câu 3)
         AppDatabase appDatabase = AppDatabase.getDatabase(getApplicationContext());
 
         editTextDate = findViewById(R.id.editTextDate);
@@ -56,28 +57,36 @@ public class MainActivity extends AppCompatActivity {
         buttonAddExpense = findViewById(R.id.buttonAddExpense);
 
         editTextDate.setEnabled(false);
+
+        //CÂu 4: Chọn đc ngày ở icon xem lịch
         calendarBtn.setOnClickListener(v -> showDatePickerDialog());
+
+
         buttonAddExpense.setOnClickListener(v -> createExpenseUsingRoomPersistence(appDatabase));
     }
 
+    //Câu4
     private void showDatePickerDialog() {
         // Get current date
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        final Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
 
-        // Create DatePickerDialog and set listener
+        // Create DatePickerDialog and set the current date as the default date
         DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this,
-                (view, _year, _month, _dayOfMonth) -> {
-                    // Set selected date to EditText
-                    String selectedDate = _dayOfMonth + "/" + (_month + 1) + "/" + _year;
-                    editTextDate.setText(selectedDate);
-                }, year, month, dayOfMonth);
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        // Set the selected date to the editTextDate
+                        editTextDate.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+                    }
+                }, year, month, day);
 
-        // Show DatePickerDialog
+        // Show the DatePickerDialog
         datePickerDialog.show();
     }
+
 
     private void clearInputData() {
         editTextDate.setText("");
@@ -142,7 +151,14 @@ public class MainActivity extends AppCompatActivity {
         clearInputData();
     }
 
-    // Using Room Persistence ----------------------------------------------
+
+
+    // Using Room Persistence
+    // Câu 3: Khi bấm nút “Thêm”, thực hiện lưu chi tiêu vào Room.
+    // Kiểm tra thông tin, yêu cầu người dùng điền đầy đủ thông tin trước trước khi lưu
+    // ----------------------------------------------
+
+
     private void createExpenseUsingRoomPersistence(AppDatabase appDatabase){
         String date = editTextDate.getText().toString();
         String expenseName = editTextExpenseName.getText().toString();
@@ -153,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
 
         new Thread(() -> {
             ExpenseEntity expense = new ExpenseEntity();
+
             expense.name = expenseName;
             expense.address = expenseAddress;
             expense.amount = expenseAmount;
